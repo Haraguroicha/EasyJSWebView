@@ -59,7 +59,7 @@ var ret = EasyJS.retValue;\
 EasyJS.retValue = undefined;\
 \
 if (ret){\
-return decodeURIComponent(ret);\
+return JSON.parse(JSON.stringify([{value:decodeURIComponent(ret)}]))[0].value;\
 }\
 },\
 \
@@ -153,18 +153,19 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 		
 		//return the value by using javascript
 		if ([sig methodReturnLength] > 0){
-			NSString* retValue;
+			const char* retValue;
 			[invoker getReturnValue:&retValue];
 			
 			if (retValue == NULL || retValue == nil){
 				[webView stringByEvaluatingJavaScriptFromString:@"EasyJS.retValue=null;"];
 			}else{
-				retValue = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef) retValue, NULL, (CFStringRef)@"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
-				[webView stringByEvaluatingJavaScriptFromString:[@"" stringByAppendingFormat:@"EasyJS.retValue=\"%@\";", retValue]];
+				//retValue = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)retValue, NULL, (CFStringRef)@"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
+                NSString* ret = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)[[NSString alloc] initWithUTF8String:retValue], NULL, CFSTR("\':/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8));
+                retValue = [ret UTF8String];
+                //retValue = [[[[NSString alloc] initWithUTF8String:retValue] stringByReplacingOccurrencesOfString:@"!*'();:@&=+$,/?%#[]" withString:@""] UTF8String];
+				[webView stringByEvaluatingJavaScriptFromString:[@"" stringByAppendingFormat:@"EasyJS.retValue='%@';", [[NSString alloc] initWithUTF8String:retValue]]];
 			}
 		}
-		
-		[args release];
 		
 		return NO;
 	}
@@ -184,11 +185,18 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 	}
 	
 	NSMutableString* injection = [[NSMutableString alloc] init];
-	
+	NSMutableString* initialize = [[NSMutableString alloc] init];
+    
 	//inject the javascript interface
 	for(id key in self.javascriptInterfaces) {
 		NSObject* interface = [self.javascriptInterfaces objectForKey:key];
 		
+        [initialize appendString:@"if("];
+        [initialize appendString:key];
+        [initialize appendString:@".initialize != undefined) {"];
+        [initialize appendString:key];
+        [initialize appendString:@".initialize();}"];
+        
 		[injection appendString:@"EasyJS.inject(\""];
 		[injection appendString:key];
 		[injection appendString:@"\", ["];
@@ -206,33 +214,15 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 			}
 		}
 		
-		free(mlist);
-		
 		[injection appendString:@"]);"];
 	}
-	
-	
 	NSString* js = INJECT_JS;
 	//inject the basic functions first
 	[webView stringByEvaluatingJavaScriptFromString:js];
 	//inject the function interface
 	[webView stringByEvaluatingJavaScriptFromString:injection];
-	
-	[injection release];
-}
-
-- (void)dealloc{
-	if (self.javascriptInterfaces){
-		[self.javascriptInterfaces release];
-		self.javascriptInterfaces = nil;
-	}
-	
-	if (self.realDelegate){
-		[self.realDelegate release];
-		self.realDelegate = nil;
-	}
-	
-	[super dealloc];
+    //initialize injected code
+    [webView stringByEvaluatingJavaScriptFromString:initialize];
 }
 
 @end

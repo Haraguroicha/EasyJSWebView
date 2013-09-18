@@ -39,7 +39,7 @@
 	if (params){
 		for (int i = 0, l = params.count; i < l; i++){
 			NSString* arg = [params objectAtIndex:i];
-			NSString* encodedArg = (NSString*) CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8);
+			NSString* encodedArg = (NSString*) CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
 			
 			[injection appendFormat:@", \"%@\"", encodedArg];
 		}

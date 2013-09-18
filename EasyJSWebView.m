@@ -53,11 +53,4 @@
 	[self.proxyDelegate addJavascriptInterfaces:interface WithName:name];
 }
 
-- (void) dealloc{
-	[super dealloc];
-	
-	[self.proxyDelegate release];
-	self.proxyDelegate = nil;
-}
-
 @end
