@@ -27,21 +27,23 @@
 }
 
 - (NSString*) executeWithParam: (NSString*) param{
-	NSMutableArray* params = [[NSMutableArray alloc] initWithObjects:param, nil];
+	NSMutableArray *params = [[NSMutableArray alloc] initWithObjects:param, nil];
 	return [self executeWithParams:params];
 }
 
 - (NSString*) executeWithParams: (NSArray*) params{
-	NSMutableString* injection = [[NSMutableString alloc] init];
+	NSMutableString *injection = [[NSMutableString alloc] init];
 	
 	[injection appendFormat:@"EasyJS.invokeCallback(\"%@\", %@", self.funcID, self.removeAfterExecute ? @"true" : @"false"];
 	
 	if (params){
 		for (long i = 0, l = params.count; i < l; i++){
-			NSString* arg = [params objectAtIndex:i];
-			NSString* encodedArg = (NSString*) CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
+			NSString *arg = [params objectAtIndex:i];
+			NSString *encodedArg = (NSString*) CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
 			
 			[injection appendFormat:@", \"%@\"", encodedArg];
+            arg = nil;
+            encodedArg = nil;
 		}
 	}
 	
