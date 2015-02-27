@@ -26,7 +26,7 @@
 
 @property (nonatomic, assign) IBOutlet id<EasyJSWebViewProgressDelegate> progressDelegate;
 
-- (void) initEasyJS;
-- (void) addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name;
+- (void)initEasyJS;
+- (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name;
 
 @end

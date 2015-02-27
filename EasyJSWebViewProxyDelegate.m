@@ -86,8 +86,8 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 @synthesize realDelegate;
 @synthesize javascriptInterfaces;
 
-- (void) addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name{
-	if (! self.javascriptInterfaces){
+- (void)addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name{
+	if (!self.javascriptInterfaces){
 		self.javascriptInterfaces = [[NSMutableDictionary alloc] init];
 	}
 	
@@ -101,16 +101,16 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 - (void)webViewDidFinishLoad:(UIWebView *)webView{
 	[self.realDelegate webViewDidFinishLoad:webView];
     
-	if (! self.javascriptInterfaces){
+	if (!self.javascriptInterfaces) {
 		self.javascriptInterfaces = [[NSMutableDictionary alloc] init];
 	}
 	
-	NSMutableString* injection = [[NSMutableString alloc] init];
-	NSMutableString* initialize = [[NSMutableString alloc] init];
+	NSMutableString *injection = [[NSMutableString alloc] init];
+	NSMutableString *initialize = [[NSMutableString alloc] init];
     
 	//inject the javascript interface
 	for(id key in self.javascriptInterfaces) {
-		NSObject* interface = [self.javascriptInterfaces objectForKey:key];
+		NSObject *interface = [self.javascriptInterfaces objectForKey:key];
 		
         [initialize appendString:@"if("];
         [initialize appendString:key];
@@ -135,20 +135,16 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 			}
 		}
         mlist = nil;
+        cls = nil;
 		[injection appendString:@"]);"];
-        interface = nil;
 	}
-	NSString* js = INJECT_JS;
+	NSString *js = INJECT_JS;
 	//inject the basic functions first
 	[webView stringByEvaluatingJavaScriptFromString:js];
 	//inject the function interface
 	[webView stringByEvaluatingJavaScriptFromString:injection];
     //initialize injected code
     [webView stringByEvaluatingJavaScriptFromString:initialize];
-
-    js = nil;
-    injection = nil;
-    initialize = nil;
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
@@ -188,23 +184,17 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 				NSString *type = ((NSString*) [formattedArgs objectAtIndex:i]);
 				NSString *argStr = ((NSString*) [formattedArgs objectAtIndex:i + 1]);
 				
-				if ([@"f" isEqualToString:type]){
+				if ([@"f" isEqualToString:type]) {
 					EasyJSDataFunction *func = [[EasyJSDataFunction alloc] initWithWebView:(EasyJSWebView *)webView];
 					func.funcID = argStr;
 					[args addObject:func];
 					[invoker setArgument:&func atIndex:(j + 2)];
-                    func = nil;
-				}else if ([@"s" isEqualToString:type]){
+				} else if ([@"s" isEqualToString:type]) {
 					NSString *arg = [argStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 					[args addObject:arg];
 					[invoker setArgument:&arg atIndex:(j + 2)];
-                    arg = nil;
 				}
-                type = nil;
-                argStr = nil;
 			}
-            argsAsString = nil;
-            formattedArgs = nil;
 		}
 		[invoker invoke];
 
@@ -215,31 +205,19 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 			
 			if (retValue == NULL || retValue == nil){
 				[webView stringByEvaluatingJavaScriptFromString:@"EasyJS.retValue=null;"];
-			}else{
+			} else {
 				//retValue = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)retValue, NULL, (CFStringRef)@"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
                 NSString *ret = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)[[NSString alloc] initWithUTF8String:retValue], NULL, CFSTR("\':/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8));
                 retValue = [ret UTF8String];
                 //retValue = [[[[NSString alloc] initWithUTF8String:retValue] stringByReplacingOccurrencesOfString:@"!*'();:@&=+$,/?%#[]" withString:@""] UTF8String];
 				[webView stringByEvaluatingJavaScriptFromString:[@"" stringByAppendingFormat:@"EasyJS.retValue='%@';", [[NSString alloc] initWithUTF8String:retValue]]];
-                ret = nil;
 			}
-            retValue = nil;
 		}
-        invoker = nil;
-        sig = nil;
-        interface = nil;
-        method = nil;
-        obj = nil;
-        components = nil;
-        requestString = nil;
-        
 		return NO;
 	}
-	
 	if (! self.realDelegate){
 		return YES;
 	}
-	
 	return [self.realDelegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
 }
 

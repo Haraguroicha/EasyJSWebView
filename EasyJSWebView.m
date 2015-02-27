@@ -9,9 +9,11 @@
 #import "EasyJSWebView.h"
 
 @interface UIWebView ()
+
 -(id)webView:(id)view identifierForInitialRequest:(id)initialRequest fromDataSource:(id)dataSource;
 -(void)webView:(id)view resource:(id)resource didFinishLoadingFromDataSource:(id)dataSource;
 -(void)webView:(id)view resource:(id)resource didFailLoadingWithError:(id)error fromDataSource:(id)dataSource;
+
 @end
 
 @implementation EasyJSWebView
@@ -22,21 +24,23 @@
 @synthesize resourceCount;
 @synthesize resourceCompletedCount;
 
-- (id)initWithFrame:(CGRect)frame{
+- (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
 		[self initEasyJS];
     }
     return self;
 }
-- (id)init{
+
+- (id)init {
 	self = [super init];
     if (self) {
 		[self initEasyJS];
     }
     return self;
 }
-- (id)initWithCoder:(NSCoder *)aDecoder{
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
 	
 	if (self){
@@ -46,25 +50,24 @@
 	return self;
 }
 
-- (void) initEasyJS{
+- (void)initEasyJS {
 	self.proxyDelegate = [[EasyJSWebViewProxyDelegate alloc] init];
 	self.delegate = self.proxyDelegate;
 }
 
-- (void) setDelegate:(id<UIWebViewDelegate>)delegate{
-	if (delegate != self.proxyDelegate){
+- (void)setDelegate:(id<UIWebViewDelegate>)delegate {
+	if (delegate != self.proxyDelegate) {
 		self.proxyDelegate.realDelegate = delegate;
-	}else{
+	} else {
 		[super setDelegate:delegate];
 	}
 }
 
-- (void) addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name{
+- (void)addJavascriptInterfaces:(NSObject*)interface WithName:(NSString*)name {
 	[self.proxyDelegate addJavascriptInterfaces:interface WithName:name];
 }
 
--(id)webView:(id)view identifierForInitialRequest:(id)initialRequest fromDataSource:(id)dataSource
-{
+- (id)webView:(id)view identifierForInitialRequest:(id)initialRequest fromDataSource:(id)dataSource {
     [super webView:view identifierForInitialRequest:initialRequest fromDataSource:dataSource];
     return [NSNumber numberWithInt:resourceCount++];
 }
@@ -77,8 +80,7 @@
     }
 }
 
--(void)webView:(id)view resource:(id)resource didFinishLoadingFromDataSource:(id)dataSource
-{
+- (void)webView:(id)view resource:(id)resource didFinishLoadingFromDataSource:(id)dataSource {
     [super webView:view resource:resource didFinishLoadingFromDataSource:dataSource];
     resourceCompletedCount++;
     if ([self.progressDelegate respondsToSelector:@selector(webView:didReceiveResourceNumber:totalResources:)]) {
