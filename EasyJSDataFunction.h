@@ -3,6 +3,7 @@
 //  EasyJSWebViewSample
 //
 //  Created by Alex Lau on 21/1/13.
+//  Modified by 腹黒い茶 on 2/3/2015.
 //  Copyright (c) 2013 Dukeland. All rights reserved.
 //
 

@@ -3,30 +3,29 @@
 //  EasyJS
 //
 //  Created by Lau Alex on 19/1/13.
+//  Modified by 腹黒い茶 on 2/3/2015.
 //  Copyright (c) 2013 Dukeland. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 #import "EasyJSWebViewProxyDelegate.h"
 
 @class EasyJSWebView;
 
-@protocol EasyJSWebViewProgressDelegate <NSObject>
-@optional
-- (void) webView:(EasyJSWebView*)webView didReceiveResourceNumber:(int)resourceNumber totalResources:(int)totalResources;
+@interface WKWebView (private)
+
+- (void)_setCustomUserAgent:(NSString *)_customUserAgent;
+
 @end
 
-@interface EasyJSWebView : UIWebView
+@interface EasyJSWebView : WKWebView
 
 // All the events will pass through this proxy delegate first
 @property (nonatomic, retain) EasyJSWebViewProxyDelegate* proxyDelegate;
 
-@property (nonatomic, assign) int resourceCount;
-@property (nonatomic, assign) int resourceCompletedCount;
-
-@property (nonatomic, assign) IBOutlet id<EasyJSWebViewProgressDelegate> progressDelegate;
-
 - (void)initEasyJS;
+- (void)setDelegate:(EasyJSWebViewProxyDelegate *)delegate;
 - (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name;
 
 @end
