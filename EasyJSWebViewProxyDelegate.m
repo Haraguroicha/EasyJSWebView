@@ -57,52 +57,51 @@
                             requestClass:[GCDWebServerRequest class]
                        asyncProcessBlock:^(GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
                            NSString *methodInfo = [[request headers] objectForKey:@"X-Method-Info"];
-                           __block NSString *returnResource = @"";
-                           dispatch_sync(dispatch_get_main_queue(), ^{
-                               /*
-                                A sample URL structure:
-                                X-Method-Info: MyJSTest:test
-                                X-Method-Info: MyJSTest:testWithParam%3A:haha
-                                */
-                               NSArray *components = [methodInfo componentsSeparatedByString:@":"];
-                               //NSLog(@"req: %@", requestString);
+                           /*
+                            A sample URL structure:
+                            X-Method-Info: MyJSTest:test
+                            X-Method-Info: MyJSTest:testWithParam%3A:haha
+                            */
+                           NSArray *components = [methodInfo componentsSeparatedByString:@":"];
 
-                               NSString *obj = (NSString *)[components objectAtIndex:0];
-                               NSString *method = [(NSString *)[components objectAtIndex:1]
-                                                   stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                           NSString *obj = (NSString *)[components objectAtIndex:0];
+                           NSString *method = [(NSString *)[components objectAtIndex:1]
+                                               stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                           NSObject *interface = [self.javascriptInterfaces objectForKey:obj];
 
-                               NSObject *interface = [self.javascriptInterfaces objectForKey:obj];
+                           // execute the interfacing method
+                           SEL selector = NSSelectorFromString(method);
+                           NSMethodSignature *sig = [[interface class] instanceMethodSignatureForSelector:selector];
+                           NSInvocation *invoker = [NSInvocation invocationWithMethodSignature:sig];
+                           invoker.selector = selector;
+                           invoker.target = interface;
 
-                               // execute the interfacing method
-                               SEL selector = NSSelectorFromString(method);
-                               NSMethodSignature *sig = [[interface class] instanceMethodSignatureForSelector:selector];
-                               NSInvocation *invoker = [NSInvocation invocationWithMethodSignature:sig];
-                               invoker.selector = selector;
-                               invoker.target = interface;
+                           NSMutableArray *args = [[NSMutableArray alloc] init];
 
-                               NSMutableArray *args = [[NSMutableArray alloc] init];
+                           if ([components count] >= 3){
+                               NSString *argsAsString = [(NSString*)[components objectAtIndex:2]
+                                                         stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 
-                               if ([components count] >= 3){
-                                   NSString *argsAsString = [(NSString*)[components objectAtIndex:2]
-                                                             stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                               NSArray *formattedArgs = [argsAsString componentsSeparatedByString:@":"];
+                               for (long i = 0, j = 0, l = [formattedArgs count]; i < l; i += 2, j++){
+                                   NSString *type = ((NSString *)[formattedArgs objectAtIndex:i]);
+                                   NSString *argStr = ((NSString *)[formattedArgs objectAtIndex:i + 1]);
 
-                                   NSArray *formattedArgs = [argsAsString componentsSeparatedByString:@":"];
-                                   for (long i = 0, j = 0, l = [formattedArgs count]; i < l; i += 2, j++){
-                                       NSString *type = ((NSString *)[formattedArgs objectAtIndex:i]);
-                                       NSString *argStr = ((NSString *)[formattedArgs objectAtIndex:i + 1]);
-
-                                       if ([@"f" isEqualToString:type]) {
-                                           EasyJSDataFunction *func = [[EasyJSDataFunction alloc] initWithWebView:self.webView];
-                                           [func setFuncID:argStr];
-                                           [args addObject:func];
-                                           [invoker setArgument:&func atIndex:(j + 2)];
-                                       } else if ([@"s" isEqualToString:type]) {
-                                           NSString *arg = [argStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                                           [args addObject:arg];
-                                           [invoker setArgument:&arg atIndex:(j + 2)];
-                                       }
+                                   if ([@"f" isEqualToString:type]) {
+                                       EasyJSDataFunction *func = [[EasyJSDataFunction alloc] initWithWebView:self.webView];
+                                       [func setFuncID:argStr];
+                                       [args addObject:func];
+                                       [invoker setArgument:&func atIndex:(j + 2)];
+                                   } else if ([@"s" isEqualToString:type]) {
+                                       NSString *arg = [argStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                                       [args addObject:arg];
+                                       [invoker setArgument:&arg atIndex:(j + 2)];
                                    }
                                }
+                           }
+
+                           __block NSString *returnResource = @"";
+                           dispatch_sync(dispatch_get_main_queue(), ^{
                                [invoker invoke];
                                if ([sig methodReturnLength] > 0){
                                    const char *retValue;
@@ -111,8 +110,8 @@
                                        returnResource = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)[[NSString alloc] initWithUTF8String:retValue], NULL, CFSTR("\':/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8));
                                    }
                                }
-                               NSLog(@"Return result for '%@' => %@", methodInfo, returnResource);
                            });
+                           NSLog(@"Return result for '%@' => %@", methodInfo, returnResource);
                            NSString *origin = [[request headers] objectForKey:@"Origin"];
                            NSString *allowHeaders = @"X-Method-Info, Content-Type";
                            GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithText:returnResource];
