@@ -37,19 +37,19 @@
 	
 	[injection appendFormat:@"EasyJS.invokeCallback(\"%@\", %@", self.funcID, self.removeAfterExecute ? @"true" : @"false"];
 	
-	if (params){
-		for (long i = 0, l = params.count; i < l; i++){
-			NSString *arg = [params objectAtIndex:i];
-			NSString *encodedArg = (__bridge NSString *)(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef)@"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
-			[injection appendFormat:@", \"%@\"", encodedArg];
-		}
+	if (params) {
+        NSString *args = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:params
+                                                                                        options:NSJSONWritingPrettyPrinted
+                                                                                          error:nil]
+                                               encoding:NSUTF8StringEncoding];
+        [injection appendFormat:@", JSON.stringify(%@)", args];
 	}
 	
 	[injection appendString:@");"];
 
+    __block id returnObject = nil;
 	if (self.webView) {
         __block BOOL returned = NO;
-        __block id returnObject = nil;
         [self.webView evaluateJavaScript:injection completionHandler:^(id obj, NSError *error) {
             returned = YES;
             returnObject = obj;
@@ -57,10 +57,11 @@
         while (!returned) {
             [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1f]];
         }
-        return returnObject;
-	} else {
-		return nil;
 	}
+    if (self.callbackAfterExecuteAction != nil) {
+        [self callbackAfterExecuteAction];
+    }
+    return returnObject;
 }
 
 @end

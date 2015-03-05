@@ -9,16 +9,19 @@
 
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
+#import "EasyJSWebView.h"
+#import "EasyJSDataFunction.h"
 
 #define JS_HANDLER_PATH         (@"/easy-js")
 
 @interface EasyJSWebViewProxyDelegate : NSObject<WKNavigationDelegate>
 
 @property (nonatomic, retain) NSMutableDictionary* javascriptInterfaces;
-@property (nonatomic, retain) id<WKNavigationDelegate> realDelegate;
-@property (readonly, nonatomic) NSUInteger totalResources;
+@property (nonatomic, readonly) NSUInteger totalResources;
+@property (nonatomic, retain) NSString *INJECT_JS;
+@property (nonatomic, retain) EasyJSWebView *webView;
 
-- (instancetype)initWithWebView:(id)webView;
+- (instancetype)initWithWebView:(id)_webView;
 - (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name;
 
 @end

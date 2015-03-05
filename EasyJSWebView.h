@@ -9,7 +9,6 @@
 
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
-#import "EasyJSWebViewProxyDelegate.h"
 
 @class EasyJSWebView;
 
@@ -21,11 +20,6 @@
 
 @interface EasyJSWebView : WKWebView
 
-// All the events will pass through this proxy delegate first
-@property (nonatomic, retain) EasyJSWebViewProxyDelegate* proxyDelegate;
-
-- (void)initEasyJS;
-- (void)setDelegate:(EasyJSWebViewProxyDelegate *)delegate;
 - (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name;
 
 @end

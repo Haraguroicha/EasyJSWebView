@@ -8,12 +8,13 @@ window.EasyJS = {
 		args.shift();
 		
 		for (var i = 0, l = args.length; i < l; i++) {
-			args[i] = decodeURIComponent(args[i]);
+			args[i] = JSON.parse(args[i]);
 		}
 		
 		var cb = EasyJS.__callbacks[cbID];
 		if (removeAfterExecute){
 			EasyJS.__callbacks[cbID] = undefined;
+            delete EasyJS.__callbacks[cbID];
 		}
 		return cb.apply(null, args);
 	},
@@ -28,7 +29,7 @@ window.EasyJS = {
 				formattedArgs.push(cbID);
 			} else {
 				formattedArgs.push("s");
-				formattedArgs.push(encodeURIComponent(args[i]));
+				formattedArgs.push(encodeURIComponent(JSON.stringify(args[i])));
 			}
 		}
 		
@@ -36,7 +37,7 @@ window.EasyJS = {
 
         var methodInfo = obj + ":" + encodeURIComponent(functionName) + argStr;
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', window.__nativeURL + "easy-js", false);
+        xhr.open('POST', window.__nativeURL, false);
         xhr.setRequestHeader("X-Method-Info", methodInfo);
         xhr.send(methodInfo);
         if (xhr.status === 200) {

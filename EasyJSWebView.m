@@ -8,6 +8,7 @@
 //
 
 #import "EasyJSWebView.h"
+#import "EasyJSWebViewProxyDelegate.h"
 
 @interface WKWebView ()
 
@@ -19,12 +20,9 @@
 
 @implementation EasyJSWebView
 
-@synthesize proxyDelegate;
-
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-		[self initEasyJS];
     }
     return self;
 }
@@ -32,7 +30,6 @@
 - (id)init {
 	self = [super init];
     if (self) {
-		[self initEasyJS];
     }
     return self;
 }
@@ -40,22 +37,17 @@
 - (id)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
 	if (self){
-		[self initEasyJS];
 	}
 	return self;
 }
 
-- (void)initEasyJS {
-	self.proxyDelegate = [[EasyJSWebViewProxyDelegate alloc] initWithWebView:self];
-	self.navigationDelegate = self.proxyDelegate;
-}
-
-- (void)setDelegate:(EasyJSWebViewProxyDelegate *)delegate {
-    [self.proxyDelegate setRealDelegate:delegate];
-}
-
 - (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name {
-	[self.proxyDelegate addJavascriptInterfaces:interface WithName:name];
+    id<WKNavigationDelegate> delegate = self.navigationDelegate;
+    NSLog(@"%@, %d", [delegate class], [delegate isKindOfClass:[EasyJSWebViewProxyDelegate class]]);
+    if (delegate != nil && [delegate isKindOfClass:[EasyJSWebViewProxyDelegate class]]) {
+        EasyJSWebViewProxyDelegate *proxyDelegate = (EasyJSWebViewProxyDelegate *)delegate;
+        [proxyDelegate addJavascriptInterfaces:interface WithName:name];
+    }
 }
 
 @end
