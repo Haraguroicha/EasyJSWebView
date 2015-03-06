@@ -7,9 +7,8 @@ window.EasyJS = {
 		args.shift();
 		args.shift();
 		
-		for (var i = 0, l = args.length; i < l; i++) {
-			args[i] = JSON.parse(args[i]);
-		}
+        // let all of returned object in an array object, that can resolved to apply arguments to callback
+		args = JSON.parse(args.shift());
 		
 		var cb = EasyJS.__callbacks[cbID];
 		if (removeAfterExecute){
