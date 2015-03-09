@@ -35,15 +35,27 @@ window.EasyJS = {
 		var argStr = (formattedArgs.length > 0 ? ":" + encodeURIComponent(formattedArgs.join(":")) : "");
 
         var methodInfo = obj + ":" + encodeURIComponent(functionName) + argStr;
+        var __RETRY_MAX_TIMES__ = 5;
+        var retryCount = 0;
         var xhr = new XMLHttpRequest();
         xhr.open('POST', window.__nativeURL, false);
         xhr.setRequestHeader("X-Method-Info", methodInfo);
-        xhr.send(methodInfo);
+        while(true) {
+            try {
+                xhr.send(methodInfo);
+                break;
+            } catch (e) {
+                if (retryCount <= __RETRY_MAX_TIMES__) {
+                    console.error('request failed!! retry=%s with request content!!\n\t%s', ++retryCount, methodInfo);
+                } else {
+                    console.error('retry reach the limit of %s times, abort!!', __RETRY_MAX_TIMES__);
+                    break;
+                }
+            }
+        }
         if (xhr.status === 200) {
             window.__returnedValue = xhr.responseText;
             if (window.__returnedValue == "") window.__returnedValue = null;
-        } else {
-            console.log(xhr);
         }
 
         var retValue = JSON.parse(JSON.stringify([ { value: decodeURIComponent(window.__returnedValue) } ]))[0].value;
