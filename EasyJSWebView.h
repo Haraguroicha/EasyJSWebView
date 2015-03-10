@@ -14,11 +14,17 @@
 
 @interface WKWebView (private)
 
+@property (strong, nonatomic) NSString *username;
+@property (strong, nonatomic) NSString *password;
+
 - (void)_setCustomUserAgent:(NSString *)_customUserAgent;
 
 @end
 
 @interface EasyJSWebView : WKWebView
+
+@property (strong, nonatomic) NSString *username;
+@property (strong, nonatomic) NSString *password;
 
 - (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name;
 

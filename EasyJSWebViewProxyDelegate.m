@@ -93,4 +93,18 @@
     decisionHandler(WKNavigationActionPolicyAllow);
 }
 
+- (void)webView:(WKWebView *)_webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential *))completionHandler {
+    if (challenge.previousFailureCount == 0) {
+        NSURLCredentialPersistence persistence = NSURLCredentialPersistenceForSession;
+        NSURLCredential *credential = [NSURLCredential credentialWithUser:[_webView username]
+                                                                 password:[_webView password]
+                                                              persistence:persistence];
+        completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
+        //NSLog(@"%@ > %@:%@", [_webView URL], [_webView username], [_webView password]);
+    } else {
+        NSLog(@"%s: challenge.error = %@", __FUNCTION__, challenge.error);
+        completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
+    }
+}
+
 @end
