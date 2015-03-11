@@ -14,4 +14,6 @@
 
 @property (strong, nonatomic) EasyJSWebView *webView;
 
+- (void)setConfiguration:(WKWebViewConfiguration *)configuration;
+
 @end

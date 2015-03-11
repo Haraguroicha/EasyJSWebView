@@ -27,6 +27,13 @@
     return self;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration {
+    self = [super initWithFrame:frame configuration:configuration];
+    if (self) {
+    }
+    return self;
+}
+
 - (id)init {
 	self = [super init];
     if (self) {
