@@ -17,12 +17,19 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.webView = [[EasyJSWebView alloc] init];
-    self.view = self.webView;
+    self.webView = [[EasyJSWebView alloc] initWithFrame:self.view.frame];
+    [self setWebViewAutoresize];
 }
 
 - (void)setConfiguration:(WKWebViewConfiguration *)configuration {
-    self.webView = [[EasyJSWebView alloc] initWithFrame:self.view.frame configuration:configuration];
+    self.webView = [[EasyJSWebView alloc] initWithFrame:self.view.frame
+                                          configuration:configuration];
+    [self setWebViewAutoresize];
+}
+
+- (void)setWebViewAutoresize {
+    UIViewAutoresizing resizeMask = (UIViewAutoresizing)(UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight);
+    [self.webView setAutoresizingMask:resizeMask];
     self.view = self.webView;
 }
 
