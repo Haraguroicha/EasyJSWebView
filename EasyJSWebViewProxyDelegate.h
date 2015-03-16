@@ -14,7 +14,7 @@
 
 #define JS_HANDLER_PATH         (@"/easy-js")
 
-@interface EasyJSWebViewProxyDelegate : NSObject<WKNavigationDelegate>
+@interface EasyJSWebViewProxyDelegate : NSObject<WKNavigationDelegate, WKUIDelegate>
 
 @property (nonatomic, retain) NSMutableDictionary* javascriptInterfaces;
 @property (nonatomic, readonly) NSUInteger totalResources;
