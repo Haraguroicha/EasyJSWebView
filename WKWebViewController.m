@@ -22,6 +22,10 @@
 }
 
 - (void)setConfiguration:(WKWebViewConfiguration *)configuration {
+    // clean up with replace old instance
+    if (self.webView != nil) {
+        self.webView = nil;
+    }
     self.webView = [[EasyJSWebView alloc] initWithFrame:self.view.frame
                                           configuration:configuration];
     [self setWebViewAutoresize];

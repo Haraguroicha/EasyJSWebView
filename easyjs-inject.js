@@ -49,7 +49,9 @@ window.EasyJS = {
                     console.error('request failed!! retry=%s with request content!!\n\t%s', ++retryCount, methodInfo);
                 } else {
                     console.error('retry reach the limit of %s times, abort!!', __RETRY_MAX_TIMES__);
-                    break;
+                    // load specified domain to tell web view to re-initialize
+                    location.href = 'http://reload.webview/';
+                    return;
                 }
             }
         }
